@@ -1,0 +1,43 @@
+<div class="creator-container">
+  <div class="creator-card">
+    <h2>Mind Palace</h2>
+    <h3>What would you like to master?</h3>
+    
+    <form [formGroup]="topicForm" (ngSubmit)="onSubmit()">
+      <div class="form-group">
+        <label for="topic">Enter a topic or subject</label>
+        <input 
+          type="text" 
+          id="topic" 
+          formControlName="topic" 
+          class="form-control" 
+          [ngClass]="{ 'is-invalid': topicForm.get('topic')?.touched && topicForm.get('topic')?.invalid }"
+          placeholder="e.g., Machine Learning, JavaScript, Quantum Physics"
+        />
+        <div *ngIf="topicForm.get('topic')?.touched && topicForm.get('topic')?.invalid" class="invalid-feedback">
+          <div *ngIf="topicForm.get('topic')?.errors?.['required']">Topic is required</div>
+          <div *ngIf="topicForm.get('topic')?.errors?.['minlength']">Topic must be at least 3 characters</div>
+        </div>
+      </div>
+      
+      <div *ngIf="error" class="alert alert-danger">
+        {{ error }}
+      </div>
+      
+      <div *ngIf="success" class="alert alert-success">
+        Curriculum created successfully! Redirecting...
+      </div>
+      
+      <div class="form-group">
+        <button [disabled]="loading || topicForm.invalid" class="btn btn-primary">
+          <span *ngIf="loading" class="spinner-border spinner-border-sm mr-1"></span>
+          Generate Curriculum
+        </button>
+      </div>
+      
+      <div class="info-text">
+        <p>Our AI will create a comprehensive learning path to help you master this topic.</p>
+      </div>
+    </form>
+  </div>
+</div> 
