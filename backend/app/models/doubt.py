@@ -22,7 +22,7 @@ class DoubtInDB(DoubtBase):
     curriculum_updates: List[PyObjectId] = []  # References to curriculum changes made due to this doubt
     
     class Config:
-        allow_population_by_field_name = True
+        populate_by_name = True
         arbitrary_types_allowed = True
         json_encoders = {ObjectId: str}
 
@@ -36,7 +36,7 @@ class Doubt(DoubtBase):
     curriculum_updates: List[str] = []
     
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 class DoubtUpdate(BaseModel):
     answer: Optional[str] = None

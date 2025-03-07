@@ -1,4 +1,4 @@
-from typing import Optional, List
+from typing import Optional, List, Any, ClassVar, Dict
 from pydantic import BaseModel, EmailStr, Field
 from datetime import datetime
 from bson import ObjectId
@@ -15,8 +15,11 @@ class PyObjectId(ObjectId):
         return ObjectId(v)
 
     @classmethod
-    def __modify_schema__(cls, field_schema):
-        field_schema.update(type="string")
+    def __get_pydantic_core_schema__(
+        cls, _source_type, _handler
+    ):
+        from pydantic_core import core_schema
+        return core_schema.str_schema()
 
 class UserBase(BaseModel):
     email: EmailStr
@@ -35,7 +38,7 @@ class UserInDB(UserBase):
     bookmarks: List[PyObjectId] = []
     
     class Config:
-        allow_population_by_field_name = True
+        populate_by_name = True
         arbitrary_types_allowed = True
         json_encoders = {ObjectId: str}
 
@@ -46,7 +49,7 @@ class User(UserBase):
     bookmarks: List[str] = []
     
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 class UserUpdate(BaseModel):
     email: Optional[EmailStr] = None

@@ -33,7 +33,7 @@ class SubTopic(TopicBase):
     parent_id: Optional[PyObjectId] = None
     
     class Config:
-        allow_population_by_field_name = True
+        populate_by_name = True
         arbitrary_types_allowed = True
         json_encoders = {ObjectId: str}
 
@@ -42,7 +42,7 @@ class Topic(TopicBase):
     subtopics: List[SubTopic] = []
     
     class Config:
-        allow_population_by_field_name = True
+        populate_by_name = True
         arbitrary_types_allowed = True
         json_encoders = {ObjectId: str}
 
@@ -65,7 +65,7 @@ class CurriculumInDB(CurriculumBase):
     overall_progress: int = 0
     
     class Config:
-        allow_population_by_field_name = True
+        populate_by_name = True
         arbitrary_types_allowed = True
         json_encoders = {ObjectId: str}
 
@@ -80,7 +80,7 @@ class Curriculum(CurriculumBase):
     overall_progress: int = 0
     
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 class CurriculumUpdate(BaseModel):
     title: Optional[str] = None
