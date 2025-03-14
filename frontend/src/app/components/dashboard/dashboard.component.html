@@ -1,0 +1,34 @@
+<div class="dashboard">
+  <div class="search-container">
+    <input 
+      type="text" 
+      placeholder="Search topics..." 
+      [ngModel]="searchQuery"
+      (ngModelChange)="searchQuery = $event; filterTopics($event)"
+      class="search-input"
+    >
+  </div>
+
+  <div class="topics-grid">
+    <div class="topic-card" *ngFor="let topic of filteredTopics">
+      <div class="topic-header" (click)="toggleTopic(topic.id)">
+        <span class="topic-icon">{{ topic.icon }}</span>
+        <h3>{{ topic.title }}</h3>
+        <p>{{ topic.description }}</p>
+        <div class="progress-bar">
+          <div class="progress" [style.width.%]="topic.progress"></div>
+        </div>
+        <span class="expand-icon">{{ expandedTopicId === topic.id ? '▼' : '▶' }}</span>
+      </div>
+      
+      <div class="subtopics" *ngIf="expandedTopicId === topic.id">
+        <div class="subtopic" 
+             *ngFor="let subtopic of topic.subtopics"
+             [routerLink]="['/subtopic', subtopic.id]">
+          <h4>{{ subtopic.title }}</h4>
+          <p>{{ subtopic.description }}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div> 

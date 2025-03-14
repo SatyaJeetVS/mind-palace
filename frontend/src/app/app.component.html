@@ -1,25 +1,39 @@
 <div class="app-container">
-  <header *ngIf="isLoggedIn" class="app-header">
+  <header class="app-header">
     <div class="logo">
       <h1>Mind Palace</h1>
     </div>
-    <nav class="main-nav">
-      <ul>
-        <li><a routerLink="/dashboard" routerLinkActive="active">Dashboard</a></li>
-        <li><a routerLink="/create-curriculum" routerLinkActive="active">Create Curriculum</a></li>
-        <li><a routerLink="/my-curricula" routerLinkActive="active">My Curricula</a></li>
-      </ul>
-    </nav>
-    <div class="user-actions">
-      <button class="btn-logout" (click)="logout()">Logout</button>
-    </div>
   </header>
+  
+  <!-- Edge detector for left edge of screen -->
+  <div class="edge-detector" (mouseenter)="openSidebar()"></div>
+  
+  <div class="sidebar-container" (mouseleave)="closeSidebar()">
+    <div class="sidebar" [class.active]="sidebarOpen">
+      <div class="sidebar-header">
+        <div class="close-btn" (click)="toggleSidebar()">×</div>
+      </div>
+      <nav class="sidebar-nav">
+        <ul>
+          <li><a routerLink="/learning-hub" routerLinkActive="active" (click)="closeSidebar()">Learning Hub</a></li>
+          <li><a routerLink="/topics" routerLinkActive="active" (click)="closeSidebar()">Topics</a></li>
+          <li><a routerLink="/profile" routerLinkActive="active" (click)="closeSidebar()">My Aesthetic</a></li>
+        </ul>
+      </nav>
+    </div>
+    
+    <div class="menu-toggle" (mouseenter)="openSidebar()" (click)="toggleSidebar()">
+      <span class="burger-icon"></span>
+    </div>
+  </div>
+  
+  <div class="overlay" [class.active]="sidebarOpen" (click)="closeSidebar()"></div>
   
   <main class="app-content">
     <router-outlet></router-outlet>
   </main>
   
-  <footer *ngIf="isLoggedIn" class="app-footer">
+  <footer class="app-footer">
     <p>&copy; 2023 Mind Palace. All rights reserved.</p>
   </footer>
 </div> 

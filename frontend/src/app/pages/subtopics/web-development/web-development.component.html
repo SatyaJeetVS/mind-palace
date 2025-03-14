@@ -1,0 +1,24 @@
+<div class="content-container">
+  <div *ngIf="loading" class="loading-state">
+    <mat-spinner diameter="40"></mat-spinner>
+    <p>Loading content...</p>
+  </div>
+
+  <div *ngIf="error" class="error-state">
+    <mat-icon color="warn">error</mat-icon>
+    <p>{{ error }}</p>
+  </div>
+
+  <div *ngIf="!loading && !error && subtopicContent" class="subtopic-content">
+    <h1>{{ subtopicContent.title }}</h1>
+    
+    <div *ngFor="let section of subtopicContent.sections" class="section">
+      <h2>{{ section.title }}</h2>
+      <div class="content" [innerHTML]="section.content"></div>
+      
+      <div *ngIf="section.codeExample" class="code-example">
+        <pre><code>{{ section.codeExample }}</code></pre>
+      </div>
+    </div>
+  </div>
+</div> 

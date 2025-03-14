@@ -1,0 +1,15 @@
+<div class="subtopic-container">
+  <h1>{{ subtopicContent.title }}</h1>
+
+  <div class="sections">
+    <div *ngFor="let section of subtopicContent.sections" class="section">
+      <h2>{{ section.title }}</h2>
+      <div class="content" [innerHTML]="section.content"></div>
+      
+      <div class="code-example" *ngIf="section.codeExample">
+        <h3>Example:</h3>
+        <pre><code>{{ section.codeExample }}</code></pre>
+      </div>
+    </div>
+  </div>
+</div> 

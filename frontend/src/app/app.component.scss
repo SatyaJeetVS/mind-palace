@@ -1,92 +1,260 @@
+// Modern Gen Z styling
+:root {
+  --primary: #8A2BE2; // Vibrant purple
+  --secondary: #00FFFF; // Cyan
+  --dark: #121212;
+  --light: #FFFFFF;
+  --accent: #FF3366; // Hot pink
+  --gradient: linear-gradient(45deg, var(--primary), var(--accent));
+}
+
 .app-container {
+  min-height: 100vh;
   display: flex;
   flex-direction: column;
-  min-height: 100vh;
+  background-color: #f8f9fa;
+  font-family: 'Poppins', sans-serif;
+  position: relative;
+  overflow-x: hidden;
 }
 
 .app-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+  background: var(--gradient);
+  color: var(--light);
   padding: 1rem 2rem;
-  background-color: #3f51b5;
-  color: white;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  display: flex;
+  align-items: center;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+/* Edge detection for sidebar opening */
+.edge-detector {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 5px; /* Thin strip at the left edge of the screen */
+  height: 100%;
+  z-index: 1002;
+}
+
+.sidebar-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 100%;
+  z-index: 1001;
+  display: flex;
+  width: 280px;
+  pointer-events: none;
+}
+
+.sidebar-container:hover {
+  pointer-events: auto;
+}
+
+.sidebar, .menu-toggle {
+  pointer-events: auto;
+}
+
+.menu-toggle {
+  position: absolute;
+  top: 30%;
+  left: 0;
+  transform: translateY(-50%);
+  background-color: var(--primary);
+  width: 40px;
+  height: 120px; /* Taller for bookmark look */
+  border-radius: 0 8px 8px 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 101;
+  transition: all 0.3s ease;
+  box-shadow: 2px 0 10px rgba(0,0,0,0.2);
+  /* Bookmark design */
+  left: -25px;
+  overflow: hidden;
+}
+
+/* Bookmark ribbon effect */
+.menu-toggle::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: var(--primary);
+  z-index: 1;
+}
+
+.menu-toggle::after {
+  content: '';
+  position: absolute;
+  bottom: -15px;
+  left: 0;
+  width: 100%;
+  height: 30px;
+  background-color: var(--dark);
+  transform: rotate(45deg);
+  transform-origin: bottom left;
+  box-shadow: inset 0 -5px 5px rgba(0,0,0,0.1);
+  z-index: 0;
+}
+
+.menu-toggle:hover {
+  left: 0; /* Fully visible on hover */
+}
+
+/* Move burger icon when sidebar is open */
+.sidebar.active ~ .menu-toggle {
+  left: 280px;
+}
+
+.burger-icon {
+  position: relative;
+  width: 24px;
+  height: 2px;
+  background-color: var(--light);
+  transition: all 0.3s ease;
+  z-index: 2; /* Ensure it's above the bookmark design */
+}
+
+.burger-icon::before,
+.burger-icon::after {
+  content: '';
+  position: absolute;
+  width: 24px;
+  height: 2px;
+  background-color: var(--light);
+  transition: all 0.3s ease;
+}
+
+.burger-icon::before {
+  transform: translateY(-8px);
+}
+
+.burger-icon::after {
+  transform: translateY(8px);
+}
+
+/* Animation for burger icon when sidebar is open */
+.sidebar.active ~ .menu-toggle .burger-icon {
+  background-color: transparent;
+}
+
+.sidebar.active ~ .menu-toggle .burger-icon::before {
+  transform: rotate(45deg);
+}
+
+.sidebar.active ~ .menu-toggle .burger-icon::after {
+  transform: rotate(-45deg);
 }
 
 .logo h1 {
   margin: 0;
-  font-size: 1.5rem;
-  font-weight: 500;
+  font-size: 1.8rem;
+  font-weight: 700;
+  letter-spacing: -0.5px;
 }
 
-.main-nav ul {
-  display: flex;
-  list-style: none;
-  margin: 0;
-  padding: 0;
-}
-
-.main-nav li {
-  margin: 0 1rem;
-}
-
-.main-nav a {
-  color: white;
-  text-decoration: none;
-  padding: 0.5rem 0;
-  position: relative;
-}
-
-.main-nav a:hover,
-.main-nav a.active {
-  color: #fff;
-}
-
-.main-nav a:after {
-  content: '';
+.sidebar {
   position: absolute;
-  bottom: 0;
-  left: 0;
-  width: 0;
-  height: 2px;
+  top: 0;
+  left: -280px;
+  width: 280px;
+  height: 100%;
   background-color: white;
-  transition: width 0.3s;
+  box-shadow: 4px 0 10px rgba(0,0,0,0.1);
+  z-index: 1000;
+  transition: left 0.3s ease;
+  overflow-y: auto;
 }
 
-.main-nav a:hover:after,
-.main-nav a.active:after {
-  width: 100%;
+.sidebar.active {
+  left: 0;
 }
 
-.user-actions {
+.sidebar-header {
+  padding: 1.5rem;
   display: flex;
-  align-items: center;
+  justify-content: flex-end;
 }
 
-.btn-logout {
-  background-color: transparent;
-  border: 1px solid white;
-  color: white;
-  padding: 0.5rem 1rem;
-  border-radius: 4px;
+.close-btn {
+  font-size: 1.8rem;
   cursor: pointer;
-  transition: background-color 0.2s;
+  color: #666;
 }
 
-.btn-logout:hover {
-  background-color: rgba(255, 255, 255, 0.1);
+.sidebar-nav ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.sidebar-nav li {
+  border-bottom: 1px solid #eee;
+}
+
+.sidebar-nav a {
+  display: block;
+  padding: 1rem 1.5rem;
+  color: #333;
+  text-decoration: none;
+  transition: all 0.3s ease;
+}
+
+.sidebar-nav a:hover,
+.sidebar-nav a.active {
+  background-color: #f5f5f5;
+  color: var(--primary);
+  padding-left: 1.8rem;
+}
+
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0,0,0,0.5);
+  z-index: 999;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.3s ease;
+}
+
+.overlay.active {
+  opacity: 1;
+  visibility: visible;
 }
 
 .app-content {
   flex: 1;
-  padding: 0;
+  padding: 2rem;
+  background-color: #f8f9fa;
 }
 
 .app-footer {
-  padding: 1rem 2rem;
-  background-color: #f5f5f5;
+  background-color: var(--dark);
+  color: var(--light);
   text-align: center;
-  color: #666;
-  font-size: 0.875rem;
+  padding: 1rem;
+  font-size: 0.9rem;
+}
+
+// Responsive design
+@media (max-width: 768px) {
+  .app-header {
+    padding: 1rem;
+  }
+  
+  .app-content {
+    padding: 1.5rem;
+  }
 } 

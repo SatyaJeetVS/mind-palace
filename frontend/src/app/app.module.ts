@@ -1,41 +1,38 @@
 import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
-import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
-import { ReactiveFormsModule } from '@angular/forms';
-import { RouterModule, Routes } from '@angular/router';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { HttpClientModule } from '@angular/common/http';
+import { CommonModule } from '@angular/common';
 
+// Angular Material Imports
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatIconModule } from '@angular/material/icon';
+import { MatCardModule } from '@angular/material/card';
+import { MatButtonModule } from '@angular/material/button';
+
+import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
-import { LoginComponent } from './components/login/login.component';
-import { CurriculumCreatorComponent } from './components/curriculum-creator/curriculum-creator.component';
-
-// Import other components as needed
-
-import { AuthInterceptor } from './interceptors/auth.interceptor';
-import { AuthGuard } from './guards/auth.guard';
-
-const routes: Routes = [
-  { path: 'login', component: LoginComponent },
-  { path: 'create-curriculum', component: CurriculumCreatorComponent, canActivate: [AuthGuard] },
-  // Add other routes as needed
-  { path: '', redirectTo: '/login', pathMatch: 'full' }
-];
+import { TopicComponent } from './pages/topic/topic.component';
+import { SubtopicComponent } from './pages/subtopic/subtopic.component';
 
 @NgModule({
   declarations: [
     AppComponent,
-    LoginComponent,
-    CurriculumCreatorComponent
-    // Add other components as needed
+    TopicComponent,
+    SubtopicComponent
   ],
   imports: [
     BrowserModule,
+    BrowserAnimationsModule,
     HttpClientModule,
-    ReactiveFormsModule,
-    RouterModule.forRoot(routes)
+    CommonModule,
+    AppRoutingModule,
+    MatProgressSpinnerModule,
+    MatIconModule,
+    MatCardModule,
+    MatButtonModule
   ],
-  providers: [
-    { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true }
-  ],
+  providers: [],
   bootstrap: [AppComponent]
 })
-export class AppModule { } 
+export class AppModule { }

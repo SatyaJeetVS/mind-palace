@@ -1,0 +1,88 @@
+<div class="learning-hub">
+  <h1 class="hub-title">Learning Hub</h1>
+  <p class="hub-subtitle">Explore topics and expand your knowledge</p>
+  
+  <!-- Topics List -->
+  <div class="topics-container">
+    <!-- TODO: Replace with API data from backend -->
+    <div class="topic-card" *ngFor="let topic of topics">
+      <div class="topic-header" (click)="toggleTopic(topic.id)">
+        <div class="topic-icon" [style.backgroundImage]="'url(' + topic.imageUrl + ')'">
+          <div class="progress-indicator" [style.width.%]="topic.progress"></div>
+        </div>
+        <div class="topic-info">
+          <h2 class="topic-title">{{topic.title}}</h2>
+          <p class="topic-description">{{topic.description}}</p>
+          <div class="progress-bar">
+            <div class="progress" [style.width.%]="topic.progress" [style.background-color]="getProgressColor(topic.progress)"></div>
+          </div>
+          <span class="progress-text">{{topic.progress}}% Complete</span>
+        </div>
+        <div class="expand-icon" [class.expanded]="isTopicExpanded(topic.id)">
+          <span></span>
+          <span></span>
+        </div>
+      </div>
+      
+      <!-- Subtopics List -->
+      <div class="subtopics-container" *ngIf="isTopicExpanded(topic.id)">
+        <!-- TODO: Replace with API data from backend -->
+        <div class="subtopic-item" *ngFor="let subtopic of topic.subtopics">
+          <div class="subtopic-header" (click)="toggleSubtopic(subtopic.id)">
+            <div class="subtopic-progress">
+              <div class="circle-progress" [style.background]="'conic-gradient(' + getProgressColor(subtopic.progress) + ' ' + subtopic.progress + '%, #f0f0f0 ' + subtopic.progress + '%)'"></div>
+            </div>
+            <div class="subtopic-info">
+              <h3 class="subtopic-title">{{subtopic.title}}</h3>
+              <p class="subtopic-description">{{subtopic.description}}</p>
+            </div>
+            <div class="expand-icon small" [class.expanded]="isSubtopicExpanded(subtopic.id)">
+              <span></span>
+              <span></span>
+            </div>
+          </div>
+          
+          <!-- Subtopic Content -->
+          <div class="content-panel" *ngIf="isSubtopicExpanded(subtopic.id) && subtopic.content">
+            <!-- Text Content -->
+            <div class="content-section" *ngIf="subtopic.content.text">
+              <p class="content-text">{{subtopic.content.text}}</p>
+            </div>
+            
+            <!-- Image Content -->
+            <div class="content-section" *ngIf="subtopic.content.imageUrl">
+              <!-- TODO: Replace with actual image from backend storage -->
+              <img class="content-image" [src]="subtopic.content.imageUrl" [alt]="subtopic.title">
+            </div>
+            
+            <!-- Code Snippet -->
+            <div class="content-section code-section" *ngIf="subtopic.content.codeSnippet">
+              <!-- TODO: Replace with syntax highlighting component -->
+              <h4>Code Example</h4>
+              <pre class="code-snippet"><code>{{subtopic.content.codeSnippet}}</code></pre>
+            </div>
+            
+            <!-- TODO: Add video player component for videoUrl -->
+            
+            <!-- Quiz Component -->
+            <div class="content-section quiz-section" *ngIf="subtopic.content.quizzes && subtopic.content.quizzes.length > 0">
+              <!-- TODO: Replace with interactive quiz component -->
+              <h4>Practice Quiz</h4>
+              <div class="quiz-item" *ngFor="let quiz of subtopic.content.quizzes">
+                <p class="quiz-question">{{quiz.question}}</p>
+                <div class="quiz-options">
+                  <div class="quiz-option" *ngFor="let option of quiz.options; let i = index">
+                    <label>
+                      <input type="radio" name="quiz-{{quiz.question}}" [value]="i">
+                      {{option}}
+                    </label>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div> 

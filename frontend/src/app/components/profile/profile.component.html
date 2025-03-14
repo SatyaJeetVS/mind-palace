@@ -1,0 +1,32 @@
+<div class="profile-container">
+  <div class="profile-card">
+    <div class="profile-header">
+      <div class="profile-avatar">
+        <!-- Placeholder for profile image -->
+        <div class="avatar-placeholder">
+          {{ user.name.charAt(0) }}
+        </div>
+      </div>
+      <h1>{{ user.name }}</h1>
+      <p class="email">{{ user.email }}</p>
+    </div>
+    
+    <div class="profile-body">
+      <div class="section">
+        <h2>About Me</h2>
+        <p>{{ user.bio }}</p>
+      </div>
+      
+      <div class="section">
+        <h2>Account Details</h2>
+        <p><strong>Member since:</strong> {{ user.joinDate | date:'mediumDate' }}</p>
+      </div>
+      
+      <div class="section">
+        <h2>Learning Progress</h2>
+        <p>You haven't started any courses yet.</p>
+        <a routerLink="/dashboard" class="btn-primary">Explore Courses</a>
+      </div>
+    </div>
+  </div>
+</div> 
