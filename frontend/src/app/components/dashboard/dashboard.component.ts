@@ -1,10 +1,13 @@
 import { Component, OnInit } from '@angular/core';
-import { Router } from '@angular/router';
+import { Router, ActivatedRoute } from '@angular/router';
+import { MatDialog } from '@angular/material/dialog';
+import { TopicSwitchConfirmationComponent } from '../dialogs/topic-switch-confirmation.component';
 
 interface Subtopic {
   id: string;
   title: string;
   description: string;
+  completed?: boolean;
 }
 
 interface Topic {
@@ -14,6 +17,21 @@ interface Topic {
   icon: string;
   progress: number;
   subtopics: Subtopic[];
+}
+
+interface TreeNode {
+  id: string;
+  title: string;
+  description: string;
+  children?: TreeNode[];
+  level: number;
+  expanded?: boolean;
+  completed?: boolean;
+}
+
+interface ConfirmDialogData {
+  currentTopic: string;
+  newTopic: string;
 }
 
 @Component({
@@ -129,32 +147,133 @@ export class DashboardComponent implements OnInit {
       ]
     }
   ];
-  filteredTopics: Topic[] = [];
-  expandedTopicId: string | null = null;
-
-  constructor(private router: Router) {}
+  
+  currentTopic: Topic | null = null;
+  treeNodes: TreeNode[] = [];
+  
+  constructor(
+    private router: Router, 
+    private route: ActivatedRoute,
+    private dialog: MatDialog
+  ) {}
 
   ngOnInit() {
-    this.filteredTopics = [...this.topics];
+    // Subscribe to route params to get the current topic
+    this.route.params.subscribe(params => {
+      if (params['id']) {
+        this.loadTopic(params['id']);
+      } else {
+        // Default to the first topic if none is specified
+        this.loadTopic(this.topics[0].id);
+      }
+    });
+  }
+
+  loadTopic(topicId: string) {
+    const topic = this.topics.find(t => t.id === topicId);
+    if (topic) {
+      this.currentTopic = topic;
+      this.buildTreeNodes();
+    }
+  }
+
+  buildTreeNodes() {
+    if (!this.currentTopic) return;
+    
+    // Create the root node (the topic itself)
+    const rootNode: TreeNode = {
+      id: this.currentTopic.id,
+      title: this.currentTopic.title,
+      description: this.currentTopic.description,
+      level: 0,
+      expanded: true,
+      children: []
+    };
+    
+    // Add subtopics as children
+    if (this.currentTopic.subtopics) {
+      rootNode.children = this.currentTopic.subtopics.map(subtopic => ({
+        id: subtopic.id,
+        title: subtopic.title,
+        description: subtopic.description,
+        level: 1,
+        expanded: false,
+        completed: subtopic.completed || false
+      }));
+    }
+    
+    this.treeNodes = [rootNode];
+  }
+
+  toggleNode(node: TreeNode) {
+    node.expanded = !node.expanded;
+  }
+
+  navigateToSubtopic(subtopicId: string) {
+    if (this.currentTopic) {
+      this.router.navigate(['/subtopic', subtopicId]);
+    }
+  }
+
+  markSubtopicCompleted(subtopicId: string, event: Event) {
+    event.stopPropagation();
+    
+    if (this.currentTopic) {
+      // Find the subtopic in the current topic
+      const subtopic = this.currentTopic.subtopics.find(s => s.id === subtopicId);
+      if (subtopic) {
+        // Toggle completion status
+        subtopic.completed = !subtopic.completed;
+        
+        // Update progress percentage
+        this.updateTopicProgress();
+        
+        // Rebuild tree nodes to reflect changes
+        this.buildTreeNodes();
+        
+        // In a real app, you would save this to a backend
+        console.log(`Subtopic ${subtopicId} marked as ${subtopic.completed ? 'completed' : 'incomplete'}`);
+      }
+    }
+  }
+  
+  updateTopicProgress() {
+    if (this.currentTopic && this.currentTopic.subtopics.length > 0) {
+      const completedCount = this.currentTopic.subtopics.filter(s => s.completed).length;
+      this.currentTopic.progress = Math.round((completedCount / this.currentTopic.subtopics.length) * 100);
+    }
+  }
+
+  switchTopic(newTopicId: string) {
+    if (this.currentTopic && this.currentTopic.id !== newTopicId) {
+      // Open confirmation dialog
+      this.openConfirmationDialog(this.currentTopic.title, 
+        this.topics.find(t => t.id === newTopicId)?.title || 'new topic');
+    } else {
+      this.loadTopic(newTopicId);
+      this.router.navigate(['/topics', newTopicId]);
+    }
+  }
+
+  openConfirmationDialog(currentTopic: string, newTopic: string) {
+    const dialogRef = this.dialog.open(TopicSwitchConfirmationComponent, {
+      width: '400px',
+      data: { currentTopic, newTopic }
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        // User confirmed the switch
+        const newTopicId = this.topics.find(t => t.title === newTopic)?.id;
+        if (newTopicId) {
+          this.loadTopic(newTopicId);
+          this.router.navigate(['/topics', newTopicId]);
+        }
+      }
+    });
   }
 
   filterTopics(event: any) {
-    if (!this.searchQuery.trim()) {
-      this.filteredTopics = [...this.topics];
-      return;
-    }
-    
-    this.filteredTopics = this.topics.filter(topic => 
-      topic.title.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
-      topic.description.toLowerCase().includes(this.searchQuery.toLowerCase())
-    );
-  }
-
-  toggleTopic(topicId: string) {
-    this.expandedTopicId = this.expandedTopicId === topicId ? null : topicId;
-  }
-
-  navigateToSubtopic(topicId: string, subtopicId: string) {
-    this.router.navigate(['/subtopic', `${topicId}-${subtopicId}`]);
+    // This method is no longer needed with the new approach
   }
 } 

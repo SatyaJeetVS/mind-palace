@@ -7,6 +7,8 @@
 - [ ] Add error handling middleware
 
 ## Frontend Tasks
+- [IMP] Programming will have will language , oops topics currilculum switcing
+
 - [ ] Fix navigation in topic component
 - [ ] Add loading states to all components
 - [ ] Implement user profile page

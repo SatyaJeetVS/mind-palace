@@ -15,8 +15,22 @@
       </div>
       <nav class="sidebar-nav">
         <ul>
-          <li><a routerLink="/learning-hub" routerLinkActive="active" (click)="closeSidebar()">Learning Hub</a></li>
-          <li><a routerLink="/topics" routerLinkActive="active" (click)="closeSidebar()">Topics</a></li>
+          <li><a routerLink="/dashboard" routerLinkActive="active" (click)="closeSidebar()">Learning Hub</a></li>
+          <li class="dropdown-container" (mouseenter)="showTopics()" (mouseleave)="hideTopics()">
+            <a routerLink="/topics" routerLinkActive="active">
+              Topics
+              <span class="dropdown-indicator" [class.rotated]="showTopicsDropdown">▶</span>
+            </a>
+            <div class="dropdown-menu" [class.show]="showTopicsDropdown">
+              <div class="dropdown-header">Available Topics</div>
+              <div class="dropdown-item" 
+                   *ngFor="let topic of topics" 
+                   (click)="navigateToTopic(topic.id)"
+                   [class.active]="currentTopicId === topic.id">
+                {{ topic.title }}
+              </div>
+            </div>
+          </li>
           <li><a routerLink="/profile" routerLinkActive="active" (click)="closeSidebar()">My Aesthetic</a></li>
         </ul>
       </nav>

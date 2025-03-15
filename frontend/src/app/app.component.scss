@@ -199,6 +199,7 @@
 
 .sidebar-nav li {
   border-bottom: 1px solid #eee;
+  position: relative; /* Add this for dropdown positioning */
 }
 
 .sidebar-nav a {
@@ -207,6 +208,9 @@
   color: #333;
   text-decoration: none;
   transition: all 0.3s ease;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
 .sidebar-nav a:hover,
@@ -214,6 +218,87 @@
   background-color: #f5f5f5;
   color: var(--primary);
   padding-left: 1.8rem;
+}
+
+/* Dropdown styles */
+.dropdown-container {
+  position: relative;
+}
+
+.dropdown-menu {
+  position: static; /* Change from absolute to static to make it part of the flow */
+  width: 100%;
+  background-color: #f8f9fa;
+  box-shadow: inset 0 4px 8px -4px rgba(0,0,0,0.1), inset 0 -4px 8px -4px rgba(0,0,0,0.1);
+  opacity: 0;
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease, opacity 0.2s ease;
+  z-index: 1001;
+}
+
+.dropdown-header {
+  padding: 0.8rem 1.5rem;
+  font-weight: bold;
+  color: var(--primary);
+  border-bottom: 1px solid #ddd;
+  background-color: #f8f9fa;
+}
+
+.dropdown-menu.show {
+  opacity: 1;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+/* Additional hover effect as a fallback */
+.dropdown-container:hover .dropdown-menu {
+  opacity: 1;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.dropdown-item {
+  padding: 0.8rem 1.5rem 0.8rem 2.5rem;
+  color: #333;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border-bottom: 1px solid #eee;
+  background-color: #f0f0f0; /* Slightly different background to distinguish from parent */
+  
+  &.active {
+    background-color: #e0e0f5;
+    color: var(--primary);
+    font-weight: 500;
+    border-left: 3px solid var(--primary);
+  }
+}
+
+.dropdown-item:hover {
+  background-color: #e8e8e8;
+  color: var(--primary);
+  padding-left: 3rem;
+}
+
+.dropdown-item:last-child {
+  border-bottom: none;
+}
+
+.dropdown-indicator {
+  font-size: 0.8rem;
+  color: #999;
+  transition: transform 0.3s ease;
+  margin-left: 5px;
+}
+
+.dropdown-indicator.rotated {
+  transform: rotate(90deg);
+  color: var(--primary);
+}
+
+.dropdown-container:hover .dropdown-indicator {
+  transform: rotate(90deg);
+  color: var(--primary);
 }
 
 .overlay {
@@ -256,5 +341,23 @@
   
   .app-content {
     padding: 1.5rem;
+  }
+  
+  /* On mobile, we need to handle the dropdown differently */
+  .dropdown-container:hover .dropdown-menu {
+    /* Don't show on hover for mobile */
+    opacity: 0;
+    max-height: 0;
+  }
+  
+  /* Only show when the class is applied */
+  .dropdown-menu.show {
+    opacity: 1;
+    max-height: 300px;
+  }
+  
+  /* Ensure dropdown items are clearly visible on mobile */
+  .dropdown-item {
+    padding: 1rem 1.5rem 1rem 2.5rem;
   }
 } 

@@ -1,32 +1,51 @@
-<div class="dashboard">
-  <div class="search-container">
-    <input 
-      type="text" 
-      placeholder="Search topics..." 
-      [ngModel]="searchQuery"
-      (ngModelChange)="searchQuery = $event; filterTopics($event)"
-      class="search-input"
-    >
+<div class="topic-hub">
+  <div class="topic-hub-header">
+    <h1>{{ currentTopic?.title || 'Topic Hub' }}</h1>
+    <p class="topic-description">{{ currentTopic?.description }}</p>
+    <div class="progress-container" *ngIf="currentTopic">
+      <div class="progress-bar">
+        <div class="progress" [style.width.%]="currentTopic.progress"></div>
+      </div>
+      <span class="progress-text">{{ currentTopic.progress }}% Complete</span>
+    </div>
   </div>
 
-  <div class="topics-grid">
-    <div class="topic-card" *ngFor="let topic of filteredTopics">
-      <div class="topic-header" (click)="toggleTopic(topic.id)">
-        <span class="topic-icon">{{ topic.icon }}</span>
-        <h3>{{ topic.title }}</h3>
-        <p>{{ topic.description }}</p>
-        <div class="progress-bar">
-          <div class="progress" [style.width.%]="topic.progress"></div>
+  <div class="learning-tree-container">
+    <h2>Learning Path</h2>
+    <div class="learning-tree">
+      <div class="tree-node" *ngFor="let node of treeNodes" [class.expanded]="node.expanded">
+        <div class="node-content" (click)="toggleNode(node)">
+          <div class="node-icon">{{ currentTopic?.icon }}</div>
+          <div class="node-info">
+            <h3>{{ node.title }}</h3>
+            <p>{{ node.description }}</p>
+          </div>
+          <div class="node-toggle" *ngIf="node.children && node.children.length">
+            <span [class.rotated]="node.expanded">▶</span>
+          </div>
         </div>
-        <span class="expand-icon">{{ expandedTopicId === topic.id ? '▼' : '▶' }}</span>
-      </div>
-      
-      <div class="subtopics" *ngIf="expandedTopicId === topic.id">
-        <div class="subtopic" 
-             *ngFor="let subtopic of topic.subtopics"
-             [routerLink]="['/subtopic', subtopic.id]">
-          <h4>{{ subtopic.title }}</h4>
-          <p>{{ subtopic.description }}</p>
+
+        <div class="node-children" *ngIf="node.expanded && node.children && node.children.length">
+          <div class="tree-node child-node" *ngFor="let childNode of node.children" 
+               [class.completed]="childNode.completed">
+            <div class="node-content">
+              <div class="node-status">
+                <div class="status-icon" 
+                     [class.completed]="childNode.completed" 
+                     (click)="markSubtopicCompleted(childNode.id, $event)"
+                     [title]="childNode.completed ? 'Mark as incomplete' : 'Mark as completed'">
+                  <span *ngIf="childNode.completed">✓</span>
+                </div>
+              </div>
+              <div class="node-info">
+                <h4>{{ childNode.title }}</h4>
+                <p>{{ childNode.description }}</p>
+              </div>
+              <div class="node-action">
+                <button class="start-btn" (click)="navigateToSubtopic(childNode.id); $event.stopPropagation()">Start</button>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>

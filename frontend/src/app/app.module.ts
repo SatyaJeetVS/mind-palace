@@ -1,36 +1,37 @@
 import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
+import { FormsModule } from '@angular/forms';
+import { RouterModule } from '@angular/router';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import { HttpClientModule } from '@angular/common/http';
-import { CommonModule } from '@angular/common';
-
-// Angular Material Imports
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { MatIconModule } from '@angular/material/icon';
-import { MatCardModule } from '@angular/material/card';
-import { MatButtonModule } from '@angular/material/button';
-
 import { AppRoutingModule } from './app-routing.module';
+import { MatIconModule } from '@angular/material/icon';
+import { MatDialogModule } from '@angular/material/dialog';
+import { MatButtonModule } from '@angular/material/button';
 import { AppComponent } from './app.component';
-import { TopicComponent } from './pages/topic/topic.component';
-import { SubtopicComponent } from './pages/subtopic/subtopic.component';
+import { LearningHubComponent } from './components/learning-hub/learning-hub.component';
+import { PythonBasicsComponent } from './pages/subtopics/python-basics/python-basics.component';
+import { DashboardComponent } from './components/dashboard/dashboard.component';
+import { ProfileComponent } from './components/profile/profile.component';
+import { TopicSwitchConfirmationComponent } from './components/dialogs/topic-switch-confirmation.component';
 
 @NgModule({
   declarations: [
     AppComponent,
-    TopicComponent,
-    SubtopicComponent
+    LearningHubComponent,
+    PythonBasicsComponent,
+    DashboardComponent,
+    ProfileComponent,
+    TopicSwitchConfirmationComponent
   ],
   imports: [
     BrowserModule,
-    BrowserAnimationsModule,
-    HttpClientModule,
-    CommonModule,
-    AppRoutingModule,
-    MatProgressSpinnerModule,
+    FormsModule,
+    RouterModule.forRoot([]),
     MatIconModule,
-    MatCardModule,
-    MatButtonModule
+    MatDialogModule,
+    MatButtonModule,
+    AppRoutingModule,
+    BrowserAnimationsModule
   ],
   providers: [],
   bootstrap: [AppComponent]
