@@ -1,5 +1,22 @@
 <div class="topic-hub">
   <div class="topic-hub-header">
+    <div class="topic-selector">
+      <div class="current-topic" (click)="topicDropdown = !topicDropdown">
+        <span class="topic-icon">{{ currentTopic?.icon }}</span>
+        <span class="topic-title">{{ currentTopic?.title || 'Select a Topic' }}</span>
+        <span class="dropdown-arrow">▼</span>
+      </div>
+      <div class="topic-dropdown" *ngIf="topicDropdown">
+        <div class="dropdown-item" 
+             *ngFor="let topic of topics" 
+             (click)="switchTopic(topic.id); topicDropdown = false"
+             [class.active]="topic.id === currentTopic?.id">
+          <span class="topic-icon">{{ topic.icon }}</span>
+          <span class="topic-title">{{ topic.title }}</span>
+        </div>
+      </div>
+    </div>
+    
     <h1>{{ currentTopic?.title || 'Topic Hub' }}</h1>
     <p class="topic-description">{{ currentTopic?.description }}</p>
     <div class="progress-container" *ngIf="currentTopic">
@@ -12,42 +29,111 @@
 
   <div class="learning-tree-container">
     <h2>Learning Path</h2>
-    <div class="learning-tree">
-      <div class="tree-node" *ngFor="let node of treeNodes" [class.expanded]="node.expanded">
-        <div class="node-content" (click)="toggleNode(node)">
+    
+    <div class="visual-tree">
+      <!-- Root node -->
+      <div class="root-node" *ngIf="treeNodes.length > 0">
+        <div class="node-content" (click)="toggleNode(treeNodes[0])">
           <div class="node-icon">{{ currentTopic?.icon }}</div>
           <div class="node-info">
-            <h3>{{ node.title }}</h3>
-            <p>{{ node.description }}</p>
-          </div>
-          <div class="node-toggle" *ngIf="node.children && node.children.length">
-            <span [class.rotated]="node.expanded">▶</span>
+            <h3>{{ treeNodes[0].title }}</h3>
+            <p>{{ treeNodes[0].description }}</p>
           </div>
         </div>
-
-        <div class="node-children" *ngIf="node.expanded && node.children && node.children.length">
-          <div class="tree-node child-node" *ngFor="let childNode of node.children" 
-               [class.completed]="childNode.completed">
-            <div class="node-content">
-              <div class="node-status">
-                <div class="status-icon" 
-                     [class.completed]="childNode.completed" 
-                     (click)="markSubtopicCompleted(childNode.id, $event)"
-                     [title]="childNode.completed ? 'Mark as incomplete' : 'Mark as completed'">
-                  <span *ngIf="childNode.completed">✓</span>
+        
+        <!-- First level branches -->
+        <div class="branches-container" *ngIf="treeNodes[0].expanded && treeNodes[0].children && treeNodes[0].children.length">
+          <div class="branch-line"></div>
+          
+          <div class="branches">
+            <ng-container *ngFor="let node of treeNodes[0].children; let i = index">
+              <div class="branch" [class.completed]="node.completed">
+                <div class="branch-connector"></div>
+                
+                <div class="branch-node" (click)="toggleNode(node)">
+                  <div class="node-status">
+                    <div class="status-icon" 
+                         [class.completed]="node.completed" 
+                         (click)="markSubtopicCompleted(node.id, $event)"
+                         [title]="node.completed ? 'Mark as incomplete' : 'Mark as completed'">
+                      <span *ngIf="node.completed">✓</span>
+                    </div>
+                  </div>
+                  <div class="node-info">
+                    <h4>{{ node.title }}</h4>
+                    <p>{{ node.description }}</p>
+                  </div>
+                  <div class="node-toggle" *ngIf="node.children && node.children.length">
+                    <span [class.rotated]="node.expanded">▶</span>
+                  </div>
+                  <div class="node-action" *ngIf="!node.children || node.children.length === 0">
+                    <button class="start-btn" (click)="navigateToSubtopic(node.id, $event)">Start</button>
+                  </div>
+                </div>
+                
+                <!-- Nested branches (recursive) -->
+                <div class="nested-branches" *ngIf="node.expanded && node.children && node.children.length">
+                  <ng-container *ngTemplateOutlet="nestedBranchTemplate; context: { nodes: node.children, level: 2 }"></ng-container>
                 </div>
               </div>
-              <div class="node-info">
-                <h4>{{ childNode.title }}</h4>
-                <p>{{ childNode.description }}</p>
-              </div>
-              <div class="node-action">
-                <button class="start-btn" (click)="navigateToSubtopic(childNode.id); $event.stopPropagation()">Start</button>
-              </div>
-            </div>
+            </ng-container>
           </div>
         </div>
       </div>
     </div>
+    
+    <!-- Template for nested branches -->
+    <ng-template #nestedBranchTemplate let-nodes="nodes" let-level="level">
+      <div class="branch-line"></div>
+      
+      <div class="branches">
+        <ng-container *ngFor="let node of nodes; let i = index">
+          <div class="branch" [class.completed]="node.completed" [class.level-{{level}}]="true">
+            <div class="branch-connector"></div>
+            
+            <div class="branch-node" (click)="toggleNode(node)">
+              <div class="node-status">
+                <div class="status-icon" 
+                     [class.completed]="node.completed" 
+                     (click)="markSubtopicCompleted(node.id, $event)"
+                     [title]="node.completed ? 'Mark as incomplete' : 'Mark as completed'">
+                  <span *ngIf="node.completed">✓</span>
+                </div>
+              </div>
+              <div class="node-info">
+                <h4>{{ node.title }}</h4>
+                <p>{{ node.description }}</p>
+              </div>
+              <div class="node-toggle" *ngIf="node.children && node.children.length">
+                <span [class.rotated]="node.expanded">▶</span>
+              </div>
+              <div class="node-action" *ngIf="!node.children || node.children.length === 0">
+                <button class="start-btn" (click)="navigateToSubtopic(node.id, $event)">Start</button>
+              </div>
+            </div>
+            
+            <!-- Recursively render deeper nested branches -->
+            <div class="nested-branches" *ngIf="node.expanded && node.children && node.children.length">
+              <ng-container *ngTemplateOutlet="nestedBranchTemplate; context: { nodes: node.children, level: level + 1 }"></ng-container>
+            </div>
+          </div>
+        </ng-container>
+      </div>
+    </ng-template>
   </div>
+  
+  <!-- Confirmation Dialog -->
+  <div class="confirmation-dialog" *ngIf="showConfirmDialog">
+    <div class="dialog-content">
+      <h3>Switch Topic?</h3>
+      <p>Are you sure you want to switch to a different topic? Your progress will be saved.</p>
+      <div class="dialog-actions">
+        <button class="cancel-btn" (click)="cancelTopicSwitch()">Cancel</button>
+        <button class="confirm-btn" (click)="confirmTopicSwitch()">Switch Topic</button>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Overlay for dialog -->
+  <div class="overlay" *ngIf="showConfirmDialog" (click)="cancelTopicSwitch()"></div>
 </div> 
