@@ -235,7 +235,7 @@ export class DashboardComponent implements OnInit {
       // If the subtopic has children, expand it in the tree instead of navigating
       if (subtopic.subtopics && subtopic.subtopics.length > 0) {
         this.expandNodeInTree(this.treeNodes, subtopicId);
-      return;
+        return;
       }
       
       // Otherwise navigate to the subtopic content
@@ -277,57 +277,6 @@ export class DashboardComponent implements OnInit {
     }
     
     return null;
-  }
-
-  markSubtopicCompleted(subtopicId: string, event?: MouseEvent): void {
-    if (event) {
-      event.stopPropagation();
-    }
-    
-    if (!this.currentTopic) return;
-    
-    // Find and update the subtopic in the data model
-    const updateSubtopicStatus = (subtopics: Subtopic[]): boolean => {
-      for (const subtopic of subtopics) {
-        if (subtopic.id === subtopicId) {
-          subtopic.completed = !subtopic.completed;
-          return true;
-        }
-        
-        if (subtopic.subtopics && subtopic.subtopics.length > 0) {
-          const updated = updateSubtopicStatus(subtopic.subtopics);
-          if (updated) return true;
-        }
-      }
-      
-      return false;
-    };
-    
-    const updated = updateSubtopicStatus(this.currentTopic.subtopics);
-    
-    if (updated) {
-      // Update the tree nodes to reflect the change
-      const updateTreeNodeStatus = (nodes: TreeNode[]): boolean => {
-        for (const node of nodes) {
-          if (node.id === subtopicId) {
-            node.completed = !node.completed;
-            return true;
-          }
-          
-          if (node.children && node.children.length > 0) {
-            const updated = updateTreeNodeStatus(node.children);
-            if (updated) return true;
-          }
-        }
-        
-        return false;
-      };
-      
-      updateTreeNodeStatus(this.treeNodes);
-      
-      // Update the topic progress
-      this.updateTopicProgress();
-    }
   }
 
   updateTopicProgress(): void {
@@ -385,4 +334,4 @@ export class DashboardComponent implements OnInit {
   filterTopics(event: any) {
     // This method is no longer needed with the new approach
   }
-} 
+}

@@ -7,16 +7,10 @@
     <!-- TODO: Replace with API data from backend -->
     <div class="topic-card" *ngFor="let topic of topics">
       <div class="topic-header" (click)="toggleTopic(topic.id)">
-        <div class="topic-icon" [style.backgroundImage]="'url(' + topic.imageUrl + ')'">
-          <div class="progress-indicator" [style.width.%]="topic.progress"></div>
-        </div>
+        <div class="topic-icon" [style.backgroundImage]="'url(' + topic.imageUrl + ')'"></div>
         <div class="topic-info">
           <h2 class="topic-title">{{topic.title}}</h2>
           <p class="topic-description">{{topic.description}}</p>
-          <div class="progress-bar">
-            <div class="progress" [style.width.%]="topic.progress" [style.background-color]="getProgressColor(topic.progress)"></div>
-          </div>
-          <span class="progress-text">{{topic.progress}}% Complete</span>
         </div>
         <div class="expand-icon" [class.expanded]="isTopicExpanded(topic.id)">
           <span></span>
@@ -29,9 +23,6 @@
         <!-- TODO: Replace with API data from backend -->
         <div class="subtopic-item" *ngFor="let subtopic of topic.subtopics">
           <div class="subtopic-header" (click)="toggleSubtopic(subtopic.id)">
-            <div class="subtopic-progress">
-              <div class="circle-progress" [style.background]="'conic-gradient(' + getProgressColor(subtopic.progress) + ' ' + subtopic.progress + '%, #f0f0f0 ' + subtopic.progress + '%)'"></div>
-            </div>
             <div class="subtopic-info">
               <h3 class="subtopic-title">{{subtopic.title}}</h3>
               <p class="subtopic-description">{{subtopic.description}}</p>
@@ -85,4 +76,4 @@
       </div>
     </div>
   </div>
-</div> 
+</div>

@@ -17,12 +17,6 @@ interface Subtopic {
         <div class="overlay"></div>
         <div class="content">
           <h1>{{topicTitle}}</h1>
-          <div class="progress-container">
-            <div class="progress-bar">
-              <div class="progress" [style.width.%]="topicProgress"></div>
-            </div>
-            <span>{{topicProgress}}% Complete</span>
-          </div>
         </div>
       </div>
       
@@ -31,11 +25,6 @@ interface Subtopic {
         
         <div class="subtopics-list">
           <div class="subtopic-item" *ngFor="let subtopic of subtopics">
-            <div class="subtopic-status">
-              <div class="status-icon" [class.completed]="subtopic.completed">
-                <i class="check-icon" *ngIf="subtopic.completed">✓</i>
-              </div>
-            </div>
             <div class="subtopic-content">
               <h3>{{subtopic.title}}</h3>
               <p>{{subtopic.description}}</p>
@@ -83,28 +72,9 @@ interface Subtopic {
     }
     
     h1 {
-      margin: 0 0 1rem 0;
+      margin: 0;
       font-size: 2.5rem;
       font-weight: 700;
-    }
-    
-    .progress-container {
-      display: flex;
-      align-items: center;
-      gap: 1rem;
-    }
-    
-    .progress-bar {
-      flex: 1;
-      height: 8px;
-      background-color: rgba(255,255,255,0.3);
-      border-radius: 4px;
-      overflow: hidden;
-    }
-    
-    .progress {
-      height: 100%;
-      background: linear-gradient(90deg, #8A2BE2, #FF3366);
     }
     
     h2 {
@@ -131,33 +101,6 @@ interface Subtopic {
     .subtopic-item:hover {
       transform: translateY(-3px);
       box-shadow: 0 6px 20px rgba(0,0,0,0.1);
-    }
-    
-    .subtopic-status {
-      padding: 1.5rem;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    
-    .status-icon {
-      width: 24px;
-      height: 24px;
-      border-radius: 50%;
-      border: 2px solid #ddd;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    
-    .status-icon.completed {
-      border-color: #8A2BE2;
-      background-color: #8A2BE2;
-      color: white;
-    }
-    
-    .check-icon {
-      font-size: 14px;
     }
     
     .subtopic-content {
@@ -321,4 +264,4 @@ export class TopicDetailComponent implements OnInit {
       this.subtopics = [];
     }
   }
-} 
+}

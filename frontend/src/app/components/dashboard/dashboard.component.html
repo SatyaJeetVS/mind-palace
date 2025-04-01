@@ -19,12 +19,6 @@
     
     <h1>{{ currentTopic?.title || 'Topic Hub' }}</h1>
     <p class="topic-description">{{ currentTopic?.description }}</p>
-    <div class="progress-container" *ngIf="currentTopic">
-      <div class="progress-bar">
-        <div class="progress" [style.width.%]="currentTopic.progress"></div>
-      </div>
-      <span class="progress-text">{{ currentTopic.progress }}% Complete</span>
-    </div>
   </div>
 
   <div class="learning-tree-container">
@@ -51,14 +45,6 @@
                 <div class="branch-connector"></div>
                 
                 <div class="branch-node" (click)="toggleNode(node)">
-                  <div class="node-status">
-                    <div class="status-icon" 
-                         [class.completed]="node.completed" 
-                         (click)="markSubtopicCompleted(node.id, $event)"
-                         [title]="node.completed ? 'Mark as incomplete' : 'Mark as completed'">
-                      <span *ngIf="node.completed">✓</span>
-                    </div>
-                  </div>
                   <div class="node-info">
                     <h4>{{ node.title }}</h4>
                     <p>{{ node.description }}</p>
@@ -92,14 +78,6 @@
             <div class="branch-connector"></div>
             
             <div class="branch-node" (click)="toggleNode(node)">
-              <div class="node-status">
-                <div class="status-icon" 
-                     [class.completed]="node.completed" 
-                     (click)="markSubtopicCompleted(node.id, $event)"
-                     [title]="node.completed ? 'Mark as incomplete' : 'Mark as completed'">
-                  <span *ngIf="node.completed">✓</span>
-                </div>
-              </div>
               <div class="node-info">
                 <h4>{{ node.title }}</h4>
                 <p>{{ node.description }}</p>
@@ -136,4 +114,4 @@
   
   <!-- Overlay for dialog -->
   <div class="overlay" *ngIf="showConfirmDialog" (click)="cancelTopicSwitch()"></div>
-</div> 
+</div>
