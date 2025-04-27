@@ -1,22 +1,18 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-
-interface Subtopic {
-  id: number;
-  title: string;
-  description: string;
-  duration: string;
-  completed: boolean;
-}
+import { CurriculumService } from '../../services/curriculum.service';
+import { Topic, SubTopic } from '../../models/curriculum.model';
+import { catchError } from 'rxjs/operators';
+import { of } from 'rxjs';
 
 @Component({
   selector: 'app-topic-detail',
   template: `
-    <div class="topic-detail">
-      <div class="topic-header" [style.backgroundImage]="'url(' + topicImage + ')'">
+    <div class="topic-detail" *ngIf="currentTopic">
+      <div class="topic-header" [style.backgroundImage]="getBackgroundImage()">
         <div class="overlay"></div>
         <div class="content">
-          <h1>{{topicTitle}}</h1>
+          <h1>{{currentTopic.title}}</h1>
         </div>
       </div>
       
@@ -24,16 +20,24 @@ interface Subtopic {
         <h2>Subtopics</h2>
         
         <div class="subtopics-list">
-          <div class="subtopic-item" *ngFor="let subtopic of subtopics">
+          <div class="subtopic-item" *ngFor="let subtopic of currentTopic.subtopics">
             <div class="subtopic-content">
               <h3>{{subtopic.title}}</h3>
               <p>{{subtopic.description}}</p>
               <div class="subtopic-meta">
-                <span class="duration">{{subtopic.duration}}</span>
+                <span class="duration">{{getDuration(subtopic.estimated_time_minutes)}}</span>
               </div>
             </div>
           </div>
         </div>
+      </div>
+      
+      <div class="loading-indicator" *ngIf="isLoading">
+        Loading topic details...
+      </div>
+      
+      <div class="error-message" *ngIf="errorMessage">
+        {{errorMessage}}
       </div>
     </div>
   `,
@@ -141,127 +145,99 @@ interface Subtopic {
         font-size: 1.8rem;
       }
     }
+    
+    .loading-indicator {
+      text-align: center;
+      padding: 2rem;
+      color: #666;
+    }
+    
+    .error-message {
+      text-align: center;
+      padding: 2rem;
+      color: #e74c3c;
+      background: rgba(231, 76, 60, 0.1);
+      border-radius: 8px;
+    }
   `]
 })
 export class TopicDetailComponent implements OnInit {
-  topicId: number = 0;
-  topicTitle: string = '';
-  topicImage: string = '';
-  topicProgress: number = 0;
-  subtopics: Subtopic[] = [];
+  topicId: string = '';
+  curriculumId: string = '';
+  currentTopic: Topic | null = null;
+  isLoading: boolean = false;
+  errorMessage: string = '';
   
-  constructor(private route: ActivatedRoute) {}
+  constructor(
+    private route: ActivatedRoute,
+    private curriculumService: CurriculumService
+  ) {}
   
   ngOnInit() {
+    this.isLoading = true;
+    
     this.route.params.subscribe(params => {
-      this.topicId = +params['id'];
+      this.topicId = params['id'];
       this.loadTopicDetails();
+    });
+    
+    // Get curriculum ID from query params or from a service if stored elsewhere
+    this.route.queryParams.subscribe(queryParams => {
+      this.curriculumId = queryParams['curriculumId'];
     });
   }
   
   loadTopicDetails() {
-    // Mock data - in a real app, this would come from an API
-    const topics = [
-      {
-        id: 1,
-        title: 'Python Basics',
-        image: 'https://images.unsplash.com/photo-1526379879527-8559ecfcb0c8?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=500&q=80',
-        progress: 75
-      },
-      {
-        id: 2,
-        title: 'Web Development',
-        image: 'https://images.unsplash.com/photo-1547658719-da2b51169166?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=500&q=80',
-        progress: 30
-      }
-    ];
-    
-    const topic = topics.find(t => t.id === this.topicId);
-    if (topic) {
-      this.topicTitle = topic.title;
-      this.topicImage = topic.image;
-      this.topicProgress = topic.progress;
+    if (!this.curriculumId) {
+      this.errorMessage = 'Curriculum ID is missing. Unable to load topic details.';
+      this.isLoading = false;
+      return;
     }
     
-    // Mock subtopics data
-    if (this.topicId === 1) { // Python Basics
-      this.subtopics = [
-        {
-          id: 1,
-          title: 'Introduction to Python',
-          description: 'Learn about Python history, installation, and basic syntax',
-          duration: '45 min',
-          completed: true
-        },
-        {
-          id: 2,
-          title: 'Variables and Data Types',
-          description: 'Understand different data types and how to use variables',
-          duration: '1 hour',
-          completed: true
-        },
-        {
-          id: 3,
-          title: 'Control Flow',
-          description: 'Master if statements, loops, and conditional logic',
-          duration: '1.5 hours',
-          completed: true
-        },
-        {
-          id: 4,
-          title: 'Functions and Modules',
-          description: 'Learn to create reusable code with functions and modules',
-          duration: '2 hours',
-          completed: false
-        },
-        {
-          id: 5,
-          title: 'Working with Files',
-          description: 'Read and write files in Python',
-          duration: '1 hour',
-          completed: false
+    this.isLoading = true;
+    this.errorMessage = '';
+    
+    this.curriculumService.getCurriculum(this.curriculumId)
+      .pipe(
+        catchError(error => {
+          this.errorMessage = 'Unable to load topic details. Please try again later.';
+          this.isLoading = false;
+          return of(null);
+        })
+      )
+      .subscribe(curriculum => {
+        if (curriculum) {
+          this.currentTopic = curriculum.topics.find(t => t.id === this.topicId) || null;
+          
+          if (!this.currentTopic) {
+            this.errorMessage = 'Topic not found.';
+          }
         }
-      ];
-    } else if (this.topicId === 2) { // Web Development
-      this.subtopics = [
-        {
-          id: 1,
-          title: 'HTML Fundamentals',
-          description: 'Learn the building blocks of web pages',
-          duration: '1 hour',
-          completed: true
-        },
-        {
-          id: 2,
-          title: 'CSS Styling',
-          description: 'Make your web pages beautiful with CSS',
-          duration: '1.5 hours',
-          completed: true
-        },
-        {
-          id: 3,
-          title: 'JavaScript Basics',
-          description: 'Add interactivity to your websites',
-          duration: '2 hours',
-          completed: false
-        },
-        {
-          id: 4,
-          title: 'Responsive Design',
-          description: 'Make your websites work on all devices',
-          duration: '1 hour',
-          completed: false
-        },
-        {
-          id: 5,
-          title: 'Web APIs',
-          description: 'Connect to external services and data',
-          duration: '1.5 hours',
-          completed: false
-        }
-      ];
+        
+        this.isLoading = false;
+      });
+  }
+  
+  getBackgroundImage(): string {
+    // You can implement logic to generate background images based on topic name
+    // or add an image field to your Topic model if you want to store custom images
+    return `url('https://source.unsplash.com/featured/?${this.currentTopic?.title.replace(' ', ',')}')`;
+  }
+  
+  getDuration(minutes: number): string {
+    if (!minutes) return 'Unknown duration';
+    
+    if (minutes < 60) {
+      return `${minutes} min`;
     } else {
-      this.subtopics = [];
+      const hours = Math.floor(minutes / 60);
+      const remainingMinutes = minutes % 60;
+      
+      if (remainingMinutes === 0) {
+        return `${hours} hour${hours > 1 ? 's' : ''}`;
+      } else {
+        return `${hours} hour${hours > 1 ? 's' : ''} ${remainingMinutes} min`;
+      }
     }
   }
 }

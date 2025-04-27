@@ -25,9 +25,10 @@ async def create_user(user: UserCreate) -> UserInDB:
     existing_user = await get_user_by_email(user.email)
     if existing_user:
         raise ValueError("User with this email already exists")
-    
+
     # Create new user
     user_in_db = UserInDB(
+        id=ObjectId(),  # MongoDB still needs ObjectId for _id
         email=user.email,
         username=user.username,
         full_name=user.full_name,
@@ -37,11 +38,11 @@ async def create_user(user: UserCreate) -> UserInDB:
         updated_at=datetime.utcnow(),
         bookmarks=[]
     )
-    
+
     # Insert into database
     result = await db.db.users.insert_one(user_in_db.dict(by_alias=True))
-    user_in_db.id = result.inserted_id
-    
+    user_in_db.id = str(result.inserted_id)  # Convert ObjectId to string
+
     return user_in_db
 
 async def update_user(user_id: str, user_update: UserUpdate) -> Optional[UserInDB]:
@@ -82,4 +83,4 @@ async def remove_bookmark(user_id: str, curriculum_id: str) -> Optional[UserInDB
         {"_id": ObjectId(user_id)},
         {"$pull": {"bookmarks": ObjectId(curriculum_id)}}
     )
-    return await get_user_by_id(user_id) 
+    return await get_user_by_id(user_id)

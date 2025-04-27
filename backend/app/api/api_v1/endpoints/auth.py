@@ -9,6 +9,7 @@ from app.core.config import settings
 from app.db.repositories import user_repository
 from app.models.user import User, UserCreate
 from app.services.auth import verify_password, create_access_token
+import logging
 
 router = APIRouter()
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl=f"{settings.API_V1_STR}/auth/login")
@@ -50,6 +51,10 @@ async def register(user: UserCreate):
     """Register a new user."""
     try:
         db_user = await user_repository.create_user(user)
+        logger = logging.getLogger(__name__)
+        logger.debug(f"User registered successfully: {db_user}")
+
+        # Ensure proper serialization of ObjectId to string
         return User(
             id=str(db_user.id),
             email=db_user.email,
@@ -102,4 +107,4 @@ async def read_users_me(current_user = Depends(get_current_active_user)):
         created_at=current_user.created_at,
         updated_at=current_user.updated_at,
         bookmarks=[str(b) for b in current_user.bookmarks]
-    ) 
+    )

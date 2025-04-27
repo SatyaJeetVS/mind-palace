@@ -22,7 +22,7 @@
               <span class="dropdown-indicator" [class.rotated]="showTopicsDropdown">▶</span>
             </a>
             <div class="dropdown-menu" [class.show]="showTopicsDropdown">
-              <div class="dropdown-header">Available Topics</div>
+              <div class="dropdown-header">Topics under this subject</div>
               <div class="dropdown-item" 
                    *ngFor="let topic of topics" 
                    (click)="navigateToTopic(topic.id)"
@@ -31,7 +31,7 @@
               </div>
             </div>
           </li>
-          <li><a routerLink="/profile" routerLinkActive="active" (click)="closeSidebar()">My Aesthetic</a></li>
+          <li><a routerLink="/profile" routerLinkActive="active" (click)="closeSidebar()">My profile</a></li>
         </ul>
       </nav>
     </div>

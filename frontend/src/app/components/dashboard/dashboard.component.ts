@@ -2,23 +2,10 @@ import { Component, OnInit } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
 import { TopicSwitchConfirmationComponent } from '../dialogs/topic-switch-confirmation.component';
-
-interface Subtopic {
-  id: string;
-  title: string;
-  description: string;
-  completed: boolean;
-  subtopics?: Subtopic[];
-}
-
-interface Topic {
-  id: string;
-  title: string;
-  description: string;
-  icon: string;
-  progress: number;
-  subtopics: Subtopic[];
-}
+import { CurriculumService } from '../../services/curriculum.service';
+import { Topic, SubTopic } from '../../models/curriculum.model';
+import { catchError } from 'rxjs/operators';
+import { of } from 'rxjs';
 
 interface TreeNode {
   id: string;
@@ -27,11 +14,6 @@ interface TreeNode {
   completed: boolean;
   expanded: boolean;
   children?: TreeNode[];
-}
-
-interface ConfirmDialogData {
-  currentTopic: string;
-  newTopic: string;
 }
 
 @Component({
@@ -47,129 +29,83 @@ export class DashboardComponent implements OnInit {
   showConfirmDialog = false;
   pendingTopicId: string | null = null;
   topicDropdown = false;
+  isLoading = false;
+  errorMessage = '';
+  curriculumId = '';
   
   constructor(
     private router: Router, 
     private route: ActivatedRoute,
-    private dialog: MatDialog
+    private dialog: MatDialog,
+    private curriculumService: CurriculumService
   ) {}
 
   ngOnInit() {
-    this.loadTopics();
-    // Set the first topic as current by default
-    if (this.topics.length > 0) {
-      this.setCurrentTopic(this.topics[0].id);
-    }
+    this.route.queryParams.subscribe(params => {
+      this.curriculumId = params['curriculumId'];
+      if (this.curriculumId) {
+        this.loadCurriculum();
+      } else {
+        // If no curriculum ID is provided, load all curricula and use the first one
+        this.loadAllCurricula();
+      }
+    });
   }
 
-  loadTopics(): void {
-    // This would typically be an API call
-    this.topics = [
-    {
-      id: 'python-basics',
-      title: 'Python Basics',
-      description: 'Learn the fundamentals of Python programming',
-      icon: '🐍',
-        progress: 45,
-      subtopics: [
-        {
-            id: 'variables',
-          title: 'Variables and Data Types',
-            description: 'Learn about variables, numbers, strings, and booleans',
-            completed: true,
-            subtopics: [
-              {
-                id: 'numbers',
-                title: 'Numbers',
-                description: 'Integers, floats, and numeric operations',
-                completed: true
-              },
-              {
-                id: 'strings',
-                title: 'Strings',
-                description: 'Text manipulation and formatting',
-                completed: false,
-                subtopics: [
-                  {
-                    id: 'string-methods',
-                    title: 'String Methods',
-                    description: 'Common string operations and methods',
-                    completed: false
-                  },
-                  {
-                    id: 'string-formatting',
-                    title: 'String Formatting',
-                    description: 'Different ways to format strings in Python',
-                    completed: false
+  loadAllCurricula(): void {
+    this.isLoading = true;
+    this.errorMessage = '';
+    
+    this.curriculumService.getAllCurricula()
+      .pipe(
+        catchError(error => {
+          this.errorMessage = 'Unable to load curricula. Please try again later.';
+          this.isLoading = false;
+          return of([]);
+        })
+      )
+      .subscribe(curricula => {
+        if (curricula.length > 0) {
+          this.curriculumId = curricula[0].id;
+          this.loadCurriculum();
+        } else {
+          this.isLoading = false;
+          this.errorMessage = 'No curricula found. Create a new curriculum to get started.';
         }
-      ]
-    },
-    {
-                id: 'booleans',
-                title: 'Booleans',
-                description: 'True, False, and logical operations',
-                completed: false
-              }
-            ]
-          },
-          {
-            id: 'control-flow',
-            title: 'Control Flow',
-            description: 'Learn about if statements, loops, and control structures',
-            completed: false,
-      subtopics: [
-              {
-                id: 'if-statements',
-                title: 'If Statements',
-                description: 'Conditional execution with if, elif, and else',
-                completed: false
-              },
-              {
-                id: 'loops',
-                title: 'Loops',
-                description: 'Repeated execution with for and while loops',
-                completed: false,
-      subtopics: [
-                  {
-                    id: 'for-loops',
-                    title: 'For Loops',
-                    description: 'Iterating over sequences with for loops',
-                    completed: false
-                  },
-                  {
-                    id: 'while-loops',
-                    title: 'While Loops',
-                    description: 'Conditional loops with while statements',
-                    completed: false
-                  }
-                ]
-              }
-            ]
+      });
+  }
+
+  loadCurriculum(): void {
+    this.isLoading = true;
+    this.errorMessage = '';
+    
+    this.curriculumService.getCurriculum(this.curriculumId)
+      .pipe(
+        catchError(error => {
+          this.errorMessage = 'Unable to load curriculum. Please try again later.';
+          this.isLoading = false;
+          return of(null);
+        })
+      )
+      .subscribe(curriculum => {
+        if (curriculum) {
+          this.topics = curriculum.topics;
+          
+          // Set the first topic as current by default or keep the current one if it exists
+          if (this.currentTopic) {
+            const existingTopic = this.topics.find(t => t.id === this.currentTopic!.id);
+            if (existingTopic) {
+              this.setCurrentTopic(existingTopic.id);
+            } else if (this.topics.length > 0) {
+              this.setCurrentTopic(this.topics[0].id);
+            }
+          } else if (this.topics.length > 0) {
+            this.setCurrentTopic(this.topics[0].id);
           }
-        ]
-      },
-      {
-        id: 'javascript-basics',
-        title: 'JavaScript Basics',
-        description: 'Learn the fundamentals of JavaScript programming',
-        icon: '📜',
-        progress: 20,
-      subtopics: [
-          {
-            id: 'js-variables',
-            title: 'Variables and Data Types',
-            description: 'Learn about let, const, and JavaScript data types',
-            completed: true
-          },
-          {
-            id: 'js-functions',
-            title: 'Functions',
-            description: 'Learn about function declarations, expressions, and arrow functions',
-            completed: false
-          }
-        ]
-      }
-    ];
+        }
+        
+        this.isLoading = false;
+      });
   }
 
   setCurrentTopic(topicId: string): void {
@@ -188,7 +124,7 @@ export class DashboardComponent implements OnInit {
       id: this.currentTopic.id,
       title: this.currentTopic.title,
       description: this.currentTopic.description,
-      completed: false,
+      completed: this.currentTopic.is_completed,
       expanded: true,
       children: []
     };
@@ -201,22 +137,32 @@ export class DashboardComponent implements OnInit {
     this.treeNodes = [rootNode];
   }
   
-  buildSubtopicNodes(subtopics: Subtopic[]): TreeNode[] {
+  buildSubtopicNodes(subtopics: SubTopic[]): TreeNode[] {
     return subtopics.map(subtopic => {
       const node: TreeNode = {
         id: subtopic.id,
         title: subtopic.title,
         description: subtopic.description,
-        completed: subtopic.completed,
+        completed: subtopic.is_completed,
         expanded: false
       };
       
-      if (subtopic.subtopics && subtopic.subtopics.length > 0) {
-        node.children = this.buildSubtopicNodes(subtopic.subtopics);
+      // Check if there are child subtopics (this would need to be added to your model)
+      const childSubtopics = this.findChildSubtopics(subtopic.id);
+      if (childSubtopics.length > 0) {
+        node.children = this.buildSubtopicNodes(childSubtopics);
       }
       
       return node;
     });
+  }
+  
+  findChildSubtopics(parentId: string): SubTopic[] {
+    // This assumes subtopics in your model have a parent_id field
+    // You might need to adjust this based on your actual data structure
+    if (!this.currentTopic) return [];
+    
+    return this.currentTopic.subtopics.filter(s => s.parent_id === parentId);
   }
 
   toggleNode(node: TreeNode): void {
@@ -228,19 +174,28 @@ export class DashboardComponent implements OnInit {
       event.stopPropagation();
     }
     
-    // Find the subtopic at any level of nesting
-    const subtopic = this.findSubtopic(this.currentTopic?.subtopics || [], subtopicId);
+    // Find the subtopic
+    const subtopic = this.findSubtopicById(subtopicId);
     
     if (subtopic) {
-      // If the subtopic has children, expand it in the tree instead of navigating
-      if (subtopic.subtopics && subtopic.subtopics.length > 0) {
-        this.expandNodeInTree(this.treeNodes, subtopicId);
-        return;
-      }
+      // Check if this subtopic has children
+      const hasChildren = this.findChildSubtopics(subtopicId).length > 0;
       
-      // Otherwise navigate to the subtopic content
-      this.router.navigate(['/topic', this.currentTopic?.id, 'subtopic', subtopicId]);
+      if (hasChildren) {
+        // If it has children, expand it in the tree instead of navigating
+        this.expandNodeInTree(this.treeNodes, subtopicId);
+      } else {
+        // Otherwise navigate to the subtopic content
+        this.router.navigate(['/topic', this.currentTopic?.id, 'subtopic', subtopicId], {
+          queryParams: { curriculumId: this.curriculumId }
+        });
+      }
     }
+  }
+  
+  findSubtopicById(subtopicId: string): SubTopic | undefined {
+    if (!this.currentTopic) return undefined;
+    return this.currentTopic.subtopics.find(s => s.id === subtopicId);
   }
   
   expandNodeInTree(nodes: TreeNode[], nodeId: string): boolean {
@@ -262,53 +217,23 @@ export class DashboardComponent implements OnInit {
     return false;
   }
 
-  findSubtopic(subtopics: Subtopic[], subtopicId: string): Subtopic | null {
-    for (const subtopic of subtopics) {
-      if (subtopic.id === subtopicId) {
-        return subtopic;
-      }
-      
-      if (subtopic.subtopics && subtopic.subtopics.length > 0) {
-        const found = this.findSubtopic(subtopic.subtopics, subtopicId);
-        if (found) {
-          return found;
-        }
-      }
-    }
-    
-    return null;
-  }
-
   updateTopicProgress(): void {
-    if (!this.currentTopic) return;
+    if (!this.currentTopic || !this.curriculumId) return;
     
-    const countSubtopics = (subtopics: Subtopic[]): { total: number, completed: number } => {
-      let total = 0;
-      let completed = 0;
-      
-      for (const subtopic of subtopics) {
-        total++;
-        if (subtopic.completed) {
-          completed++;
-        }
-        
-        if (subtopic.subtopics && subtopic.subtopics.length > 0) {
-          const counts = countSubtopics(subtopic.subtopics);
-          total += counts.total;
-          completed += counts.completed;
-        }
+    this.curriculumService.updateTopicProgress(
+      this.curriculumId,
+      this.currentTopic.id,
+      this.currentTopic.progress_percentage
+    ).subscribe(
+      updatedCurriculum => {
+        // Refresh topics with updated progress data
+        this.topics = updatedCurriculum.topics;
+        this.setCurrentTopic(this.currentTopic!.id);
+      },
+      error => {
+        console.error('Failed to update progress', error);
       }
-      
-      return { total, completed };
-    };
-    
-    const counts = countSubtopics(this.currentTopic.subtopics);
-    
-    if (counts.total > 0) {
-      this.currentTopic.progress = Math.round((counts.completed / counts.total) * 100);
-    } else {
-      this.currentTopic.progress = 0;
-    }
+    );
   }
 
   switchTopic(topicId: string): void {
@@ -329,9 +254,5 @@ export class DashboardComponent implements OnInit {
   cancelTopicSwitch(): void {
     this.pendingTopicId = null;
     this.showConfirmDialog = false;
-  }
-
-  filterTopics(event: any) {
-    // This method is no longer needed with the new approach
   }
 }

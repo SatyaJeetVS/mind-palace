@@ -21,11 +21,11 @@ async def create_curriculum(user_id: str, curriculum_data: Dict[str, Any]) -> Cu
     """Create a new curriculum."""
     # Prepare curriculum data
     curriculum_in_db = CurriculumInDB(
-        title=curriculum_data["title"],
-        description=curriculum_data["description"],
-        main_topic=curriculum_data["main_topic"],
+        title=curriculum_data["topic"],
+        description=curriculum_data["summary"],
+        # topic=curriculum_data["main_topic"],
         user_id=ObjectId(user_id),
-        topics=curriculum_data.get("topics", []),
+        bb   b   btopics=curriculum_data.get("subtopics", []),
         created_at=datetime.utcnow(),
         updated_at=datetime.utcnow(),
         version=1,
