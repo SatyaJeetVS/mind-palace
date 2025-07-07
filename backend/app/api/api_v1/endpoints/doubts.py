@@ -5,7 +5,7 @@ from app.api.api_v1.endpoints.auth import get_current_active_user
 from app.db.repositories import doubt_repository, curriculum_repository
 from app.models.doubt import Doubt, DoubtCreate, DoubtUpdate
 from app.models.user import User
-from app.services.ai_service import answer_doubt, update_curriculum_based_on_doubt
+# from app.services.ai_service import answer_doubt, update_curriculum_based_on_doubt
 
 router = APIRouter()
 

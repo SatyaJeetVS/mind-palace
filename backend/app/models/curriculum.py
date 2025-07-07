@@ -7,17 +7,17 @@ from app.models.user import PyObjectId
 class Resource(BaseModel):
     title: str
     url: Optional[str] = None
-    description: Optional[str] = None
+    content: Optional[str] = None
     type: str = "article"  # article, video, book, etc.
 
 class Assessment(BaseModel):
     title: str
-    description: str
+    content: str
     questions: List[Dict[str, Any]] = []
 
 class TopicBase(BaseModel):
     title: str
-    description: str
+    content: str
     learning_objectives: List[str] = []
     content: str = ""
     difficulty_level: str = "beginner"  # beginner, intermediate, advanced
@@ -39,7 +39,7 @@ class SubTopic(TopicBase):
 
 class Topic(TopicBase):
     id: PyObjectId = Field(default_factory=PyObjectId, alias="_id")
-    subtopics: List[SubTopic] = []
+    subtopics: List["SubTopic"] = []  # Use string reference for forward ref
     
     class Config:
         populate_by_name = True
@@ -48,8 +48,7 @@ class Topic(TopicBase):
 
 class CurriculumBase(BaseModel):
     title: str
-    description: str
-    main_topic: str
+    content: str
     
 class CurriculumCreate(CurriculumBase):
     pass
@@ -82,7 +81,12 @@ class Curriculum(CurriculumBase):
     class Config:
         from_attributes = True
 
+
 class CurriculumUpdate(BaseModel):
     title: Optional[str] = None
-    description: Optional[str] = None
-    topics: Optional[List[Topic]] = None 
+    content: Optional[str] = None
+    topics: Optional[List[Topic]] = None
+
+# --- Fix for Pydantic v2 forward refs ---
+Topic.model_rebuild()
+SubTopic.model_rebuild()

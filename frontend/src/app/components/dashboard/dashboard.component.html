@@ -22,7 +22,7 @@
                *ngFor="let topic of topics" 
                (click)="switchTopic(topic.id); topicDropdown = false"
                [class.active]="topic.id === currentTopic?.id">
-            <span class="topic-icon">{{ topic.icon || '📚' }}</span>
+            <span class="topic-icon">{{ '📚' }}</span>
             <span class="topic-title">{{ topic.title }}</span>
           </div>
         </div>
@@ -39,7 +39,7 @@
         <!-- Root node -->
         <div class="root-node" *ngIf="treeNodes.length > 0">
           <div class="node-content" (click)="toggleNode(treeNodes[0])">
-            <div class="node-icon">{{ currentTopic?.icon }}</div>
+            <div class="node-icon">{{ '📚' }}</div>
             <div class="node-info">
               <h3>{{ treeNodes[0].title }}</h3>
               <p>{{ treeNodes[0].description }}</p>

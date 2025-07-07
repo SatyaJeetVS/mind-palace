@@ -12,9 +12,9 @@ import openai
 from typing import Dict, List, Any, Optional
 from app.core.config import settings
 from app.models.curriculum import Topic, SubTopic, Resource, Assessment
-
+import logging
 load_dotenv()
-
+logger = logging.getLogger(__name__)
 class Subtopic(BaseModel):
     title: str
     content: str
@@ -25,7 +25,7 @@ Subtopic.model_rebuild()
 
 class ResearchResponse(BaseModel):
     topic: str
-    summary: str
+    content: str
     subtopics: list[Subtopic] = []
     sources: list[str] = []
     tools_used: list[str] = []
@@ -33,7 +33,7 @@ class ResearchResponse(BaseModel):
 
 llm = ChatGoogleGenerativeAI(model="gemini-2.0-flash-exp")
 parser = PydanticOutputParser(pydantic_object=ResearchResponse)
-async def generate_curriculum(topic: str) -> Dict[str, Any]:
+async def generate_curriculum(topic: str) -> Dict[Any,str]:
     prompt = ChatPromptTemplate.from_messages(
         [
             (
@@ -64,6 +64,8 @@ async def generate_curriculum(topic: str) -> Dict[str, Any]:
     raw_response = agent_executor.invoke({"query": topic})
     try:
         structured_response = parser.parse(raw_response.get("output"))
-        print(structured_response.model_dump())
+        logger.info(structured_response.model_dump())
+        return structured_response.model_dump()
     except Exception as e:
         print("Error parsing response", e, "Raw Response - ", raw_response)
+        return None

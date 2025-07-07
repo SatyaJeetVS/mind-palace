@@ -40,7 +40,7 @@ async def create_user(user: UserCreate) -> UserInDB:
     )
 
     # Insert into database
-    result = await db.db.users.insert_one(user_in_db.dict(by_alias=True))
+    result = await db.db.users.insert_one(user_in_db.model_dump(by_alias=True))
     user_in_db.id = str(result.inserted_id)  # Convert ObjectId to string
 
     return user_in_db

@@ -13,7 +13,7 @@ async def get_curriculum_by_id(curriculum_id: str) -> Optional[CurriculumInDB]:
 
 async def get_curricula_by_user(user_id: str) -> List[CurriculumInDB]:
     """Get all curricula for a user."""
-    cursor = db.db.curricula.find({"user_id": ObjectId(user_id)})
+    cursor = db.db.curricula.find({"user_id": user_id})
     curricula = await cursor.to_list(length=100)  # Limit to 100 curricula
     return [CurriculumInDB(**curriculum) for curriculum in curricula]
 
@@ -22,10 +22,9 @@ async def create_curriculum(user_id: str, curriculum_data: Dict[str, Any]) -> Cu
     # Prepare curriculum data
     curriculum_in_db = CurriculumInDB(
         title=curriculum_data["topic"],
-        description=curriculum_data["summary"],
-        # topic=curriculum_data["main_topic"],
+        content=curriculum_data["content"],
         user_id=ObjectId(user_id),
-        bb   b   btopics=curriculum_data.get("subtopics", []),
+        topics=curriculum_data.get("subtopics", []),
         created_at=datetime.utcnow(),
         updated_at=datetime.utcnow(),
         version=1,
@@ -64,7 +63,7 @@ async def update_curriculum(curriculum_id: str, update_data: Dict[str, Any]) -> 
     # Add to change history
     change_entry = {
         "timestamp": datetime.utcnow(),
-        "description": update_data.get("change_description", "Curriculum updated"),
+        "content": update_data.get("change_description", "Curriculum updated"),
         "version": new_version
     }
     
@@ -106,7 +105,7 @@ async def update_topic(curriculum_id: str, topic_id: str, topic_data: Dict[str, 
     # Add to change history
     change_entry = {
         "timestamp": datetime.utcnow(),
-        "description": f"Updated topic: {topic_data.get('title', 'Unknown')}",
+        "content": f"Updated topic: {topic_data.get('title', 'Unknown')}",
         "version": new_version
     }
     
