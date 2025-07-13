@@ -13,6 +13,7 @@ import { PythonBasicsComponent } from './pages/subtopics/python-basics/python-ba
 import { DashboardComponent } from './components/dashboard/dashboard.component';
 import { ProfileComponent } from './components/profile/profile.component';
 import { TopicSwitchConfirmationComponent } from './components/dialogs/topic-switch-confirmation.component';
+import { HttpClientModule } from '@angular/common/http';
 
 @NgModule({
   declarations: [
@@ -25,6 +26,7 @@ import { TopicSwitchConfirmationComponent } from './components/dialogs/topic-swi
   ],
   imports: [
     BrowserModule,
+    HttpClientModule,
     FormsModule,
     RouterModule.forRoot([]),
     MatIconModule,

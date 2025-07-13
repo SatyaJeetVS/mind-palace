@@ -1,10 +1,13 @@
 import { Component, OnInit, HostListener } from '@angular/core';
 import { Router } from '@angular/router';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { firstValueFrom } from 'rxjs';
 
 interface Topic {
   id: string;
   title: string;
 }
+
 
 @Component({
   selector: 'app-root',
@@ -16,30 +19,51 @@ export class AppComponent implements OnInit {
   isLoggedIn = false; // This should be managed by an auth service
   sidebarOpen = false;
   showTopicsDropdown = false;
-  topics: Topic[] = [
-    { id: 'python-basics', title: 'Python Basics' },
-    { id: 'web-development', title: 'Web Development' },
-    { id: 'data-science', title: 'Data Science' },
-    { id: 'algorithms', title: 'Algorithms' },
-    { id: 'system-design', title: 'System Design' },
-    { id: 'cloud-computing', title: 'Cloud Computing' }
-  ];
+  topics: Topic[] = [];
   currentTopicId: string | null = null;
 
-  constructor(private router: Router) {
+  constructor(private router: Router, private http: HttpClient) {
     // TODO: Check login status on init
     this.isLoggedIn = false;
   }
 
-  ngOnInit(): void {
-    // In a real app, you would fetch topics from a service
-    
-    // Set initial topic from URL if available
-    const path = window.location.pathname;
-    if (path.includes('/topics/')) {
-      const topicId = path.split('/topics/')[1];
-      this.currentTopicId = topicId;
+  /**
+   * Generic HTTP call service method
+   * @param url The endpoint URL
+   * @param method HTTP method (GET, POST, PUT, DELETE, etc.)
+   * @param payload Optional request body or params
+   * @returns Promise<any> with the response
+   */
+  httpCall(url: string, method: string, payload?: any): Promise<any> {
+    const httpOptions = {
+      headers: new HttpHeaders({ 'Content-Type': 'application/json' })
+    };
+    switch (method.toUpperCase()) {
+      case 'GET':
+        return firstValueFrom(this.http.get(url, httpOptions));
+      case 'POST':
+        return firstValueFrom(this.http.post(url, payload, httpOptions));
+      case 'PUT':
+        return firstValueFrom(this.http.put(url, payload, httpOptions));
+      case 'DELETE':
+        return firstValueFrom(this.http.delete(url, httpOptions));
+      case 'PATCH':
+        return firstValueFrom(this.http.patch(url, payload, httpOptions));
+      default:
+        throw new Error('Unsupported HTTP method: ' + method);
     }
+  }
+
+  ngOnInit(): void {
+    // Fetch topics from backend
+    this.getTopics();
+
+    // Set initial topic from URL if available
+    // const path = window.location.pathname;
+    // if (path.includes('/topics/')) {
+    //   const topicId = path.split('/topics/')[1];
+    //   this.currentTopicId = topicId;
+    // }
   }
 
   logout() {
@@ -71,6 +95,18 @@ export class AppComponent implements OnInit {
 
   showTopics() {
     this.showTopicsDropdown = true;
+  }
+  
+getTopics(): void {
+    // Call backend API to get curriculum names using httpCall
+    this.httpCall('http://localhost:8000/curriculum/list-names', 'GET')
+      .then((data: Topic[]) => {
+        this.topics = data;
+      })
+      .catch((err) => {
+        console.error('Failed to fetch topics', err);
+        this.topics = [];
+      });
   }
 
   hideTopics() {
@@ -104,4 +140,6 @@ export class AppComponent implements OnInit {
       }
     }
   }
+  
 }
+

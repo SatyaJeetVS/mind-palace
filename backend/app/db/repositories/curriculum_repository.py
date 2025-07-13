@@ -1,15 +1,28 @@
+
 from typing import List, Optional, Dict, Any
 from bson import ObjectId
 from datetime import datetime
 from app.db.mongodb import db
 from app.models.curriculum import CurriculumCreate, CurriculumInDB, CurriculumUpdate, Topic
+import logging
+
+# Use the root logger or customize as needed
+logger = logging.getLogger(__name__)
 
 async def get_curriculum_by_id(curriculum_id: str) -> Optional[CurriculumInDB]:
     """Get a curriculum by ID."""
-    curriculum = await db.db.curricula.find_one({"_id": ObjectId(curriculum_id)})
+    curriculum = await db.db.curricula.find_one({"_id": curriculum_id})
+    logger.info(curriculum)
     if curriculum:
         return CurriculumInDB(**curriculum)
     return None
+
+async def list_curriculum_names_by_user(user_id: str) -> List[Dict[str, str]]:
+    """List all curriculum names and ids for a user."""
+    cursor = db.db.curricula.find({"user_id": user_id}, {"title": 1})
+    curricula = await cursor.to_list(length=100)
+    # Each curriculum: {"_id": ..., "title": ...}
+    return [{"id": str(c["_id"]), "title": c.get("title", "")} for c in curricula]
 
 async def get_curricula_by_user(user_id: str) -> List[CurriculumInDB]:
     """Get all curricula for a user."""

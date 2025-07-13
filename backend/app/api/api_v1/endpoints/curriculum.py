@@ -1,3 +1,4 @@
+
 from fastapi import APIRouter, Body, Depends, HTTPException, status
 from typing import List, Dict, Any
 import logging
@@ -36,6 +37,14 @@ async def read_curricula(current_user = Depends(get_current_active_user)):
         ))
     
     logger.info(f"Returning {len(curricula)} curricula for user: {current_user.id}")
+    return curricula
+
+@router.get("/list-names", response_model=List[Dict[str, str]])
+async def list_curriculum_names(current_user = Depends(get_current_active_user)):
+    """List all curriculum names and ids for the current user."""
+    logger.info(f"Listing curriculum names for user: {current_user.id}")
+    curricula = await curriculum_repository.list_curriculum_names_by_user(str(current_user.id))
+    logger.info(f"Returning {len(curricula)} curriculum names for user: {current_user.id}")
     return curricula
 
 @router.get("/{curriculum_id}", response_model=Curriculum)
